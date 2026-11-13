@@ -1,4 +1,4 @@
 // IPC type contract (Rust ↔ TypeScript).
-// Every DTO returned by a `#[tauri::command]` (serde `rename_all = "camelCase"`) gets an exact
-// counterpart here. Filled in by roadmap step 1.3 — see `src/lib/ipc.ts` for the typed wrappers.
-export {};
+// DTO types are generated from Rust by ts-rs into ./generated — never edit them by hand.
+// Regenerate after changing `src-tauri/src/dto.rs`: `npm run gen:types`.
+export type { AppInfoDto } from "./generated/AppInfoDto";
