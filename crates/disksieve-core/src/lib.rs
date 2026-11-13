@@ -7,9 +7,11 @@
 //! with `cargo test -p disksieve-core`.
 
 pub mod error;
+pub mod scanner;
 pub mod tree;
 
 pub use error::{CoreError, CoreResult};
+pub use scanner::{scan, CancelToken, ScanOptions, ScanProgress};
 pub use tree::{
     EntryMeta, Node, NodeFlags, NodeId, ScanStats, ScanTree, TreeBuilder, NO_NODE, ROOT,
 };

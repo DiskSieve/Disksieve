@@ -12,11 +12,23 @@ authors.workspace = true
 # NOTE: this crate must never depend on `tauri`, `webview2`, `webkit2gtk` or any windowing layer.
 [dependencies]
 bitflags.workspace = true
+rayon.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 
+# Cluster size (GetDiskFreeSpaceW) and exact on-disk size of compressed/sparse files
+# (GetCompressedFileSizeW) — safe wrappers, so no `unsafe` in our code.
+[target.'cfg(windows)'.dependencies]
+fs4.workspace = true
+filesize.workspace = true
+
 [dev-dependencies]
 tempfile.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "scanner"
+harness = false
 
 [lints]
 workspace = true
