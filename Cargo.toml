@@ -19,6 +19,7 @@ authors = ["DiskSieve Contributors"]
 # Single source of truth for dependency versions across the workspace.
 [workspace.dependencies]
 disksieve-core = { path = "crates/disksieve-core" }
+bitflags = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

@@ -7,8 +7,12 @@
 //! with `cargo test -p disksieve-core`.
 
 pub mod error;
+pub mod tree;
 
 pub use error::{CoreError, CoreResult};
+pub use tree::{
+    EntryMeta, Node, NodeFlags, NodeId, ScanStats, ScanTree, TreeBuilder, NO_NODE, ROOT,
+};
 
 /// Version of the core engine (taken from the workspace manifest).
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

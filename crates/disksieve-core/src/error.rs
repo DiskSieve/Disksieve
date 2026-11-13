@@ -16,6 +16,23 @@ pub enum CoreError {
     #[error("scan root is not a directory: {}", .0.display())]
     InvalidRoot(PathBuf),
 
+    /// A `NodeId` that does not exist in the current scan tree (e.g. from a stale UI request).
+    #[error("node {0} does not exist in the scan tree")]
+    InvalidNode(u32),
+
+    /// The operation is not allowed on this node (scan root, already trashed, …).
+    #[error("operation not allowed on node {id}: {reason}")]
+    NodeNotAllowed { id: u32, reason: &'static str },
+
+    /// The node's path contains a name that is not valid Unicode, so it cannot be rebuilt
+    /// exactly. File operations on such nodes are refused instead of guessing the path.
+    #[error("path of node {0} contains a non-Unicode name and cannot be resolved exactly")]
+    UnrepresentablePath(u32),
+
+    /// The scan tree hit a `u32` limit (more than ~4 billion nodes or 4 GiB of names).
+    #[error("scan tree capacity exceeded")]
+    TreeFull,
+
     /// Underlying I/O failure bound to a specific path.
     #[error("I/O error at {}: {source}", path.display())]
     Io {
