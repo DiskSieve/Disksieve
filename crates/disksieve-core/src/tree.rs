@@ -104,7 +104,9 @@ impl Node {
     }
 
     /// What this node adds to its parent's totals: `(logical, allocated, files)`.
-    fn contribution(&self) -> (u64, u64, u32) {
+    ///
+    /// Trashed nodes add nothing; hard links (already counted elsewhere) add only their files.
+    pub fn contribution(&self) -> (u64, u64, u32) {
         if self.flags.contains(NodeFlags::TRASHED) {
             (0, 0, 0)
         } else if self.flags.contains(NodeFlags::HARDLINK) {
