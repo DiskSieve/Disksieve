@@ -1,0 +1,26 @@
+# Normalize line endings: text files are stored and checked out with LF on every OS,
+# regardless of the contributor's core.autocrlf setting.
+* text=auto eol=lf
+
+# Windows-only scripts must keep CRLF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary assets — never touch line endings or diff them as text.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.icns  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+
+# Generated files: collapse in GitHub diffs.
+Cargo.lock          linguist-generated=true
+package-lock.json   linguist-generated=true
+src/types/generated/** linguist-generated=true
