@@ -1,7 +1,7 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ArrowUp, ChevronRight, Copy, File, Folder, FolderOpen, HardDrive, Search, ShieldAlert, ShieldCheck, RefreshCw, Trash2, Eye, ExternalLink } from "lucide-react";
-import { DRIVE_CAPACITY, TOTAL_FILES, findPath, flatten, initialDrive, removeNode, type FsNode } from "@/data/mockDrive";
+import { ArrowUp, ChevronRight, Copy, File, Folder, FolderOpen, HardDrive, Search, ShieldAlert, ShieldCheck, RefreshCw, Trash2, Eye, ExternalLink, X } from "lucide-react";
+import { findPath, flatten, initialDrive, removeNode, type FsNode } from "@/data/mockDrive";
 import { formatAge, formatBytes } from "@/lib/format";
 import { legendFor, type ColorMode } from "@/lib/treemap-palette";
 import { Logo } from "./Logo";
@@ -21,11 +21,18 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
-import { appInfo, isTauri } from "@/lib/ipc";
-import type { AppInfoDto } from "@/types/ipc";
+import { appInfo, cancelScan, demoSummary, isTauri, listDrives, pickFolder, startScan } from "@/lib/ipc";
+import type { AppInfoDto, DriveDto, ScanProgressDto, ScanSummaryDto } from "@/types/ipc";
 
 type Tab = "explorer" | "junk" | "dups";
 const MODES: { key: ColorMode; label: string }[] = [{ key: "extension", label: "By Extension" }, { key: "age", label: "Cold Data (Age)" }, { key: "junk", label: "Dev Junk" }];
+const PICK_FOLDER = "__pick_folder__";
+
+/** Scan in progress: latest progress and the expected total (used space of a drive), if known. */
+type ScanState = { progress: ScanProgressDto | null; expectedBytes: number | null };
+
+const usedBytes = (d: DriveDto) => Math.max(0, d.totalBytes - d.availableBytes);
+const formatDuration = (ms: number) => (ms < 60_000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`);
 
 export function DiskSieveApp() {
   const [tree, setTree] = useState<FsNode>(initialDrive);
@@ -37,12 +44,16 @@ export function DiskSieveApp() {
   const [ctxNode, setCtxNode] = useState<FsNode | null>(null);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [dups, setDups] = useState(initialDuplicates);
-  const [scan, setScan] = useState<{ pct: number; files: number } | null>(null);
-  const [scanTime, setScanTime] = useState(1.42);
+  const [scan, setScan] = useState<ScanState | null>(null);
+  const [summary, setSummary] = useState<ScanSummaryDto | null>(() => (isTauri() ? null : demoSummary()));
+  const [drives, setDrives] = useState<DriveDto[]>([]);
+  const [root, setRoot] = useState<string | null>(() => (isTauri() ? null : "C:\\"));
+  const scanSeq = useRef(0);
   const [info, setInfo] = useState<AppInfoDto | null>(null);
 
   useEffect(() => {
     appInfo().then(setInfo).catch((e: Error) => toast.error("Could not reach the DiskSieve engine", { description: e.message }));
+    listDrives().then(setDrives).catch((e: Error) => toast.error("Could not list drives", { description: e.message }));
   }, []);
 
   const trail = useMemo(() => findPath(tree, currentId) ?? [tree], [tree, currentId]);
@@ -69,16 +80,59 @@ export function DiskSieveApp() {
 
   const activate = (n: FsNode) => (n.isDir && n.children?.length ? setCurrentId(n.id) : setInspectId(n.id));
 
+  const runScan = useCallback((path: string) => {
+    // Only the newest scan may update the UI; an older one resolves with `null` when replaced.
+    const seq = ++scanSeq.current;
+    const drive = drives.find((d) => d.mountPoint === path);
+    setRoot(path);
+    setScan({ progress: null, expectedBytes: drive ? usedBytes(drive) : null });
+    startScan(path, (progress) => {
+      if (seq === scanSeq.current) setScan((s) => (s ? { ...s, progress } : s));
+    })
+      .then((result) => {
+        if (seq !== scanSeq.current) return;
+        setScan(null);
+        if (!result) {
+          toast("Scan cancelled", { description: "The previous results are kept." });
+          return;
+        }
+        setSummary(result);
+        toast.success("Scan complete", {
+          description: `${result.fileCount.toLocaleString()} files · ${formatBytes(result.allocatedBytes)} in ${formatDuration(result.durationMs)}`,
+        });
+      })
+      .catch((e: Error) => {
+        if (seq !== scanSeq.current) return;
+        setScan(null);
+        toast.error("Scan failed", { description: e.message });
+      });
+  }, [drives]);
+
+  const chooseFolder = async () => {
+    if (!isTauri()) {
+      toast("Folder picker opens in the desktop build");
+      return;
+    }
+    try {
+      const folder = await pickFolder();
+      if (folder) runScan(folder);
+    } catch (e) {
+      toast.error("Could not open the folder picker", { description: (e as Error).message });
+    }
+  };
+
   const rescan = () => {
-    if (scan) return;
-    const t0 = performance.now();
-    const tick = () => {
-      const pct = Math.min(100, ((performance.now() - t0) / 800) * 100);
-      setScan({ pct, files: Math.round((TOTAL_FILES * pct) / 100) });
-      if (pct < 100) requestAnimationFrame(tick);
-      else setTimeout(() => { setScan(null); setScanTime(+(1.3 + Math.random() * 0.3).toFixed(2)); toast.success("Scan complete", { description: `${TOTAL_FILES.toLocaleString()} files indexed` }); }, 150);
-    };
-    requestAnimationFrame(tick);
+    if (scan) {
+      cancelScan().catch((e: Error) => toast.error("Could not cancel the scan", { description: e.message }));
+      return;
+    }
+    if (root) runScan(root);
+    else toast("Choose a drive or folder to scan first");
+  };
+
+  const onRootSelect = (value: string) => {
+    if (value === PICK_FOLDER) void chooseFolder();
+    else runScan(value);
   };
 
   useEffect(() => {
@@ -89,7 +143,8 @@ export function DiskSieveApp() {
 
   const copyPath = (n: FsNode) => { navigator.clipboard?.writeText(n.path).catch(() => {}); toast("Path copied", { description: n.path }); };
   const largestFiles = useMemo(() => all.filter((n) => !n.isDir || n.junkTag).sort((a, b) => b.sizeBytes - a.sizeBytes).slice(0, 12), [all]);
-  const used = tree.sizeBytes;
+  const customRoot = root !== null && !drives.some((d) => d.mountPoint === root) ? root : null;
+  const scanPct = scan?.progress && scan.expectedBytes ? Math.min(99, (scan.progress.allocatedBytes / scan.expectedBytes) * 100) : null;
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -102,18 +157,29 @@ export function DiskSieveApp() {
             <Badge variant="outline" className="hidden font-mono text-[10px] text-muted-foreground sm:inline-flex">{info ? `v${info.version}` : "v…"}</Badge>
           </TooltipTrigger><TooltipContent className="font-mono text-xs">{info ? `core ${info.coreVersion} · ${info.os}/${info.arch}` : "loading…"}</TooltipContent></Tooltip>
           {!isTauri() && <Badge variant="outline" className="hidden border-warning/40 text-[10px] text-warning sm:inline-flex">demo data</Badge>}
-          <Select defaultValue="c" onValueChange={(v) => v !== "c" && toast(v === "d" ? "D:\\ Archive is offline in this prototype" : "Folder picker opens in the desktop build")}>
-            <SelectTrigger className="h-8 w-auto min-w-0 max-w-[60vw] text-xs sm:ml-2 sm:w-[270px]"><SelectValue /></SelectTrigger>
+          <Select value={root ?? ""} onValueChange={onRootSelect}>
+            <SelectTrigger className="h-8 w-auto min-w-0 max-w-[60vw] text-xs sm:ml-2 sm:w-[270px]"><SelectValue placeholder="Choose a drive or folder…" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="c">
-                <span className="flex items-center gap-2"><HardDrive className="h-3.5 w-3.5 text-primary" />C:\ Local Disk <span className="font-mono text-muted-foreground">({formatBytes(used)} / 1.0 TB)</span>
-                  <span className="h-1 w-10 overflow-hidden rounded-full bg-muted"><span className="block h-full bg-primary" style={{ width: `${(used / DRIVE_CAPACITY) * 100}%` }} /></span></span>
-              </SelectItem>
-              <SelectItem value="d"><span className="flex items-center gap-2"><HardDrive className="h-3.5 w-3.5" />D:\ Archive <span className="font-mono text-muted-foreground">(1.2 TB / 2.0 TB)</span></span></SelectItem>
-              <SelectItem value="folder"><span className="flex items-center gap-2"><FolderOpen className="h-3.5 w-3.5" />Select Folder...</span></SelectItem>
+              {drives.map((d) => (
+                <SelectItem key={d.mountPoint} value={d.mountPoint}>
+                  <span className="flex items-center gap-2">
+                    <HardDrive className={cn("h-3.5 w-3.5", d.mountPoint === root && "text-primary")} />
+                    <span className="font-mono">{d.mountPoint}</span> {d.name || (d.isRemovable ? "Removable Disk" : "Local Disk")}
+                    <span className="font-mono text-muted-foreground">({formatBytes(usedBytes(d))} / {formatBytes(d.totalBytes)})</span>
+                    <span className="h-1 w-10 overflow-hidden rounded-full bg-muted"><span className="block h-full bg-primary" style={{ width: `${d.totalBytes ? (usedBytes(d) / d.totalBytes) * 100 : 0}%` }} /></span>
+                  </span>
+                </SelectItem>
+              ))}
+              {customRoot && (
+                <SelectItem value={customRoot}><span className="flex min-w-0 items-center gap-2"><Folder className="h-3.5 w-3.5 shrink-0 text-primary" /><span className="truncate font-mono">{customRoot}</span></span></SelectItem>
+              )}
+              <SelectItem value={PICK_FOLDER}><span className="flex items-center gap-2"><FolderOpen className="h-3.5 w-3.5" />Select Folder...</span></SelectItem>
             </SelectContent>
           </Select>
-          <Button size="sm" variant="outline" className="h-8" onClick={rescan} disabled={!!scan} aria-label="Rescan"><RefreshCw className={cn("h-3.5 w-3.5", scan && "animate-spin")} /><span className="hidden sm:inline">Rescan</span></Button>
+          <Button size="sm" variant="outline" className="h-8" onClick={rescan} aria-label={scan ? "Cancel scan" : "Rescan"}>
+            {scan ? <X className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{scan ? "Cancel" : "Rescan"}</span>
+          </Button>
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="order-last w-full lg:order-none lg:mx-auto lg:w-auto">
             <TabsList className="h-9 w-full lg:w-auto">
@@ -134,8 +200,9 @@ export function DiskSieveApp() {
             </Button>
           </div>
           {scan && (
-            <div className="absolute inset-x-0 -bottom-px">
-              <Progress value={scan.pct} className="h-0.5 rounded-none" />
+            <div className="absolute inset-x-0 -bottom-px" role="progressbar" aria-label="Scan progress" aria-valuenow={scanPct === null ? undefined : Math.round(scanPct)}>
+              {scanPct !== null ? <Progress value={scanPct} className="h-0.5 rounded-none" />
+                : <div className="h-0.5 w-full animate-pulse bg-primary/70" />}
             </div>
           )}
         </header>
@@ -164,12 +231,23 @@ export function DiskSieveApp() {
                 ))}
               </div>
               <div className="hidden flex-1 items-center justify-end gap-2 md:flex">
-                <span className="rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] text-muted-foreground">
-                  {scan ? `${scan.files.toLocaleString()} files • scanning…` : `${TOTAL_FILES.toLocaleString()} files • Scanned in ${scanTime}s`}
-                </span>
                 <Tooltip><TooltipTrigger asChild>
-                  <Badge variant="outline" className="border-warning/40 text-[10px] text-warning">3 system folders skipped (Access Denied)</Badge>
-                </TooltipTrigger><TooltipContent className="font-mono text-xs">System Volume Information · $Recycle.Bin · Config.Msi</TooltipContent></Tooltip>
+                  <span className="max-w-[340px] truncate rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {scan ? `${(scan.progress?.files ?? 0).toLocaleString()} files • ${formatBytes(scan.progress?.allocatedBytes ?? 0)} • scanning…`
+                      : summary ? `${summary.fileCount.toLocaleString()} files • Scanned in ${formatDuration(summary.durationMs)}`
+                      : "Not scanned yet"}
+                  </span>
+                </TooltipTrigger><TooltipContent className="max-w-[420px] break-all font-mono text-xs">
+                  {scan ? scan.progress?.currentDir || "Starting…" : summary ? `${summary.rootPath} · ${summary.dirCount.toLocaleString()} folders · ${formatBytes(summary.allocatedBytes)} on disk` : "Pick a drive or folder above"}
+                </TooltipContent></Tooltip>
+                {(() => {
+                  const skipped = scan ? scan.progress?.skippedEntries ?? 0 : summary?.skippedEntries ?? 0;
+                  return skipped > 0 && (
+                    <Tooltip><TooltipTrigger asChild>
+                      <Badge variant="outline" className="border-warning/40 font-mono text-[10px] tabular-nums text-warning">{skipped.toLocaleString()} skipped (Access Denied)</Badge>
+                    </TooltipTrigger><TooltipContent className="max-w-[320px] text-xs">Entries without read permission are counted but not scanned.</TooltipContent></Tooltip>
+                  );
+                })()}
               </div>
             </div>
 
