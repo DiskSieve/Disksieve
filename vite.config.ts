@@ -12,6 +12,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-lived vendor chunk: React rarely changes, keeps the app chunk small.
+        manualChunks: { react: ["react", "react-dom"] },
+      },
+    },
+  },
   clearScreen: false,
   server: {
     port: 1420,

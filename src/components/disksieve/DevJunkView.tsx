@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Trash2, Sparkles } from "lucide-react";
 import type { FsNode } from "@/data/mockDrive";
-import { formatAge, formatBytes } from "@/data/mockDrive";
+import { formatAge, formatBytes } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";

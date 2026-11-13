@@ -1,7 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowUp, ChevronRight, Copy, File, Folder, FolderOpen, HardDrive, Search, ShieldAlert, ShieldCheck, RefreshCw, Trash2, Eye, ExternalLink } from "lucide-react";
-import { DRIVE_CAPACITY, TOTAL_FILES, findPath, flatten, formatAge, formatBytes, initialDrive, removeNode, type FsNode } from "@/data/mockDrive";
+import { DRIVE_CAPACITY, TOTAL_FILES, findPath, flatten, initialDrive, removeNode, type FsNode } from "@/data/mockDrive";
+import { formatAge, formatBytes } from "@/lib/format";
 import { legendFor, type ColorMode } from "@/lib/treemap-palette";
 import { Logo } from "./Logo";
 import { Treemap } from "./Treemap";

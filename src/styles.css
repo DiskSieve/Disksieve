@@ -1,9 +1,9 @@
 /*
  * Tailwind v4 entry: config lives here, with no tailwind.config.js or PostCSS plugin.
  * - Keep every @import in this top block, above @theme and the rest of the file. Install an
- *   npm package before @importing its CSS. Never @import a remote URL (web fonts, CDN CSS): the
- *   build resolves @import from the filesystem. Load those with a <link> in the head() of
- *   src/routes/__root.tsx and name the family in a --font-* token in @theme inline below.
+ *   npm package before @importing its CSS. Never use remote URLs (web fonts, CDN CSS): DiskSieve
+ *   is an offline desktop app. Fonts are bundled via @fontsource-variable/* packages imported in
+ *   src/main.tsx; name the family in a --font-* token in @theme inline below.
  */
 @import "tailwindcss" source(none);
 @source "../src";
@@ -57,8 +57,8 @@
   --color-border: var(--border);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
   --shadow-glow: var(--glow-primary);
   --color-input: var(--input);
   --color-ring: var(--ring);

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import type { FsNode } from "@/data/mockDrive";
-import { formatAge, formatBytes } from "@/data/mockDrive";
+import { formatAge, formatBytes } from "@/lib/format";
 import { colorFor, type ColorMode } from "@/lib/treemap-palette";
 
-type ECharts = import("echarts").ECharts;
+type ECharts = import("@/lib/echarts").ECharts;
 
 interface Props {
   parent: FsNode;
@@ -23,7 +23,7 @@ export function Treemap({ parent, items, mode, delta, onActivate, onContextTarge
   useEffect(() => {
     let disposed = false;
     let ro: ResizeObserver | undefined;
-    import("echarts").then((ec) => {
+    import("@/lib/echarts").then(({ echarts: ec }) => {
       if (disposed || !el.current) return;
       const c = ec.init(el.current, undefined, { renderer: "canvas" });
       chart.current = c;
@@ -54,11 +54,11 @@ export function Treemap({ parent, items, mode, delta, onActivate, onContextTarge
       animationDurationUpdate: 450,
       tooltip: {
         backgroundColor: "#121514", borderColor: "#1F2422", padding: [8, 10],
-        textStyle: { color: "#E8EDEA", fontFamily: "Geist, sans-serif", fontSize: 12 },
+        textStyle: { color: "#E8EDEA", fontFamily: "Geist Variable, Geist, sans-serif", fontSize: 12 },
         formatter: (p: { data: { node?: FsNode; name: string; value: number } }) => {
           const n = p.data.node;
           const pct = ((p.data.value / total) * 100).toFixed(1);
-          const mono = "font-family:JetBrains Mono,monospace";
+          const mono = "font-family:JetBrains Mono Variable,JetBrains Mono,monospace";
           if (!n) return `<b>${p.data.name}</b><br/><span style="${mono};color:#8A968F">${formatBytes(p.data.value)} · aggregated</span>`;
           return `<div style="min-width:180px"><b>${n.name}</b>${n.junkTag ? ` <span style="color:#1ED760">· ${n.junkTag}</span>` : ""}<br/>
             <span style="${mono}">${formatBytes(p.data.value, delta)}</span> <span style="color:#8A968F">· ${pct}% of ${parent.name}</span><br/>
@@ -72,8 +72,8 @@ export function Treemap({ parent, items, mode, delta, onActivate, onContextTarge
           show: true, position: "insideTopLeft", padding: 8, overflow: "truncate",
           formatter: (p: { name: string; value: number }) => `{n|${p.name}}\n{s|${formatBytes(p.value, delta)}}`,
           rich: {
-            n: { color: "#F2F5F3", fontSize: 12, fontWeight: 600, fontFamily: "Geist, sans-serif", lineHeight: 16 },
-            s: { color: "rgba(242,245,243,0.7)", fontSize: 11, fontFamily: "JetBrains Mono, monospace" },
+            n: { color: "#F2F5F3", fontSize: 12, fontWeight: 600, fontFamily: "Geist Variable, Geist, sans-serif", lineHeight: 16 },
+            s: { color: "rgba(242,245,243,0.7)", fontSize: 11, fontFamily: "JetBrains Mono Variable, JetBrains Mono, monospace" },
           },
         },
         itemStyle: { borderWidth: 2, gapWidth: 2, borderRadius: 4 },

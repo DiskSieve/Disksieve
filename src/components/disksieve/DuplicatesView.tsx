@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Copy, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import { duplicateGroups, formatAge, formatBytes, type DupGroup } from "@/data/mockDrive";
+import { duplicateGroups, type DupGroup } from "@/data/mockDrive";
+import { formatAge, formatBytes } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
