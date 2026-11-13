@@ -1,8 +1,21 @@
 [package]
 name = "disksieve-core"
-version = "0.1.0"
-edition = "2021"
+description = "DiskSieve core engine: scanning, arena tree, treemap projection. Pure Rust, no UI dependencies."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
 
+# NOTE: this crate must never depend on `tauri`, `webview2`, `webkit2gtk` or any windowing layer.
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
