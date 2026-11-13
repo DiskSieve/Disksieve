@@ -226,14 +226,3 @@ export const duplicateGroups: DupGroup[] = [
     { path: "C:\\Media\\Videos\\drone-iceland.mp4", daysAgo: 480 },
     { path: "C:\\Users\\dev\\Desktop\\drone-iceland-export.mp4", daysAgo: 470 }] },
 ];
-
-export function formatBytes(b: number, signed = false): string {
-  const sign = signed && b > 0 ? "+" : b < 0 ? "-" : "";
-  const a = Math.abs(b);
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let i = 0, v = a;
-  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-  return `${sign}${v.toFixed(i >= 3 ? 1 : i === 0 ? 0 : 1)} ${units[i]}`;
-}
-
-export const formatAge = (d: number) => (d === 0 ? "today" : `${d}d ago`);
