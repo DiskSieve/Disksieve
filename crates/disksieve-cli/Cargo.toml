@@ -1,11 +1,20 @@
 [package]
 name = "disksieve-cli"
-version = "0.1.0"
-edition = "2021"
+description = "DiskSieve terminal mode (v0.4.0) built on disksieve-core."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
 
 [dependencies]
-disksieve-core = { path = "../disksieve-core" }
+disksieve-core.workspace = true
 
 [[bin]]
 name = "disksieve"
 path = "src/main.rs"
+
+[lints]
+workspace = true
