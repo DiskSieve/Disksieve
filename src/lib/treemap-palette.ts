@@ -1,7 +1,7 @@
 import type { FsNode } from "@/data/mockDrive";
 
 // Data-visualisation palette (canvas needs concrete colors; mirrors chart tokens in styles.css).
-export type ColorMode = "ext" | "age" | "junk";
+export type ColorMode = "extension" | "age" | "junk";
 
 export const EXT_CATS = [
   { key: "video", label: "Video & Media", color: "#2DD4BF", exts: ["mp4", "mov", "mkv", "mp3", "flac"] },
@@ -33,11 +33,11 @@ export function containsJunk(n: FsNode): boolean {
 export const junkColor = (n: FsNode) => (n.junkTag ? "#1ED760" : containsJunk(n) ? "#1F5E3A" : "#232927");
 
 export function colorFor(n: FsNode, mode: ColorMode) {
-  return mode === "ext" ? extColor(n) : mode === "age" ? ageColor(n) : junkColor(n);
+  return mode === "extension" ? extColor(n) : mode === "age" ? ageColor(n) : junkColor(n);
 }
 
 export function legendFor(mode: ColorMode) {
-  if (mode === "ext") return EXT_CATS.map((c) => ({ label: c.label, color: c.color }));
+  if (mode === "extension") return EXT_CATS.map((c) => ({ label: c.label, color: c.color }));
   if (mode === "age") return AGE_STOPS.map((s) => ({ label: s.label, color: s.color }));
   return [{ label: "Dev artifact", color: "#1ED760" }, { label: "Contains artifacts", color: "#1F5E3A" }, { label: "Other", color: "#232927" }];
 }

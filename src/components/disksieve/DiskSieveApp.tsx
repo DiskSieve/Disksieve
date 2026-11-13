@@ -21,14 +21,16 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import { appInfo, isTauri } from "@/lib/ipc";
+import type { AppInfoDto } from "@/types/ipc";
 
 type Tab = "explorer" | "junk" | "dups";
-const MODES: { key: ColorMode; label: string }[] = [{ key: "ext", label: "By Extension" }, { key: "age", label: "Cold Data (Age)" }, { key: "junk", label: "Dev Junk" }];
+const MODES: { key: ColorMode; label: string }[] = [{ key: "extension", label: "By Extension" }, { key: "age", label: "Cold Data (Age)" }, { key: "junk", label: "Dev Junk" }];
 
 export function DiskSieveApp() {
   const [tree, setTree] = useState<FsNode>(initialDrive);
   const [currentId, setCurrentId] = useState(initialDrive.id);
-  const [mode, setMode] = useState<ColorMode>("ext");
+  const [mode, setMode] = useState<ColorMode>("extension");
   const [delta, setDelta] = useState(false);
   const [tab, setTab] = useState<Tab>("explorer");
   const [inspectId, setInspectId] = useState<string | null>(null);
@@ -37,6 +39,11 @@ export function DiskSieveApp() {
   const [dups, setDups] = useState(initialDuplicates);
   const [scan, setScan] = useState<{ pct: number; files: number } | null>(null);
   const [scanTime, setScanTime] = useState(1.42);
+  const [info, setInfo] = useState<AppInfoDto | null>(null);
+
+  useEffect(() => {
+    appInfo().then(setInfo).catch((e: Error) => toast.error("Could not reach the DiskSieve engine", { description: e.message }));
+  }, []);
 
   const trail = useMemo(() => findPath(tree, currentId) ?? [tree], [tree, currentId]);
   const current = trail[trail.length - 1]!;
@@ -91,7 +98,10 @@ export function DiskSieveApp() {
         <header className="relative flex shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 md:gap-3 md:px-4 lg:h-14 lg:flex-nowrap lg:py-0">
           <Logo />
           <span className="text-sm font-semibold tracking-tight">DiskSieve</span>
-          <Badge variant="outline" className="hidden font-mono text-[10px] text-muted-foreground sm:inline-flex">v0.1.0</Badge>
+          <Tooltip><TooltipTrigger asChild>
+            <Badge variant="outline" className="hidden font-mono text-[10px] text-muted-foreground sm:inline-flex">{info ? `v${info.version}` : "v…"}</Badge>
+          </TooltipTrigger><TooltipContent className="font-mono text-xs">{info ? `core ${info.coreVersion} · ${info.os}/${info.arch}` : "loading…"}</TooltipContent></Tooltip>
+          {!isTauri() && <Badge variant="outline" className="hidden border-warning/40 text-[10px] text-warning sm:inline-flex">demo data</Badge>}
           <Select defaultValue="c" onValueChange={(v) => v !== "c" && toast(v === "d" ? "D:\\ Archive is offline in this prototype" : "Folder picker opens in the desktop build")}>
             <SelectTrigger className="h-8 w-auto min-w-0 max-w-[60vw] text-xs sm:ml-2 sm:w-[270px]"><SelectValue /></SelectTrigger>
             <SelectContent>
