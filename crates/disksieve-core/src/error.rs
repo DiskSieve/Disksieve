@@ -29,6 +29,10 @@ pub enum CoreError {
     #[error("path of node {0} contains a non-Unicode name and cannot be resolved exactly")]
     UnrepresentablePath(u32),
 
+    /// The operation was cancelled through its `CancelToken`.
+    #[error("operation cancelled")]
+    Cancelled,
+
     /// The scan tree hit a `u32` limit (more than ~4 billion nodes or 4 GiB of names).
     #[error("scan tree capacity exceeded")]
     TreeFull,
