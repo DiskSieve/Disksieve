@@ -1,0 +1,81 @@
+# ── Agent AI (lokalne instrukcje i kontekst) ──────────────────────────────
+.claude/
+
+# ── Node / Vite / Frontend ───────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.tsbuildinfo
+.eslintcache
+.vite/
+coverage/
+.npm/
+.pnpm-store/
+
+# Logi menedżerów pakietów
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+logs/
+
+# ── Rust / Cargo ─────────────────────────────────────────────────────────
+# Cargo.lock jest ŚLEDZONY — DiskSieve to aplikacja (powtarzalne buildy).
+target/
+**/*.rs.bk
+*.pdb
+*.profraw
+*.profdata
+# Wyniki benchmarków / fuzzingu / testów migawek
+criterion/
+fuzz/artifacts/
+fuzz/corpus/
+*.snap.new
+*.pending-snap
+
+# ── Tauri v2 ─────────────────────────────────────────────────────────────
+src-tauri/target/
+# Schematy generowane automatycznie przy każdym buildzie
+src-tauri/gen/schemas/
+# Projekty mobilne (poza zakresem — Non-Goals)
+src-tauri/gen/android/
+src-tauri/gen/apple/
+# Klucze podpisywania aktualizacji (tauri-plugin-updater) — NIGDY w repo
+*.key
+*.key.pub.bak
+src-tauri/**/*.key
+
+# ── Sekrety / środowisko ─────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.p12
+
+# ── Migawki i raporty DiskSieve generowane lokalnie podczas testów ───────
+*.dsnap
+*.snapshot.zst
+
+# ── OS ───────────────────────────────────────────────────────────────────
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*~
+
+# ── IDE / Edytory ────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+*.swp
+*.swo
+*.sublime-workspace
+.fleet/
+.zed/

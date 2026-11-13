@@ -1,0 +1,11 @@
+[package]
+name = "disksieve-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+disksieve-core = { path = "../disksieve-core" }
+
+[[bin]]
+name = "disksieve"
+path = "src/main.rs"

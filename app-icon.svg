@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <rect width="100" height="100" rx="22" fill="#121413"/>
+  <circle cx="50" cy="50" r="34" stroke="#22C55E" stroke-width="4.5" fill="none"/>
+  <circle cx="50" cy="50" r="4.5" stroke="#22C55E" stroke-width="2.5" fill="none"/>
+  <circle cx="50" cy="26" r="2.6" fill="#4B5E53"/>
+  <circle cx="40" cy="32" r="2.4" fill="#466854"/><circle cx="46.5" cy="32" r="2.4" fill="#466854"/><circle cx="53.5" cy="32" r="2.4" fill="#466854"/><circle cx="60" cy="32" r="2.4" fill="#466854"/>
+  <circle cx="30" cy="38" r="2.2" fill="#3F7857"/><circle cx="36.6" cy="38" r="2.2" fill="#3F7857"/><circle cx="43.3" cy="38" r="2.2" fill="#3F7857"/><circle cx="50" cy="38" r="2.2" fill="#3F7857"/><circle cx="56.6" cy="38" r="2.2" fill="#3F7857"/><circle cx="63.3" cy="38" r="2.2" fill="#3F7857"/><circle cx="70" cy="38" r="2.2" fill="#3F7857"/>
+  <circle cx="33" cy="44" r="2" fill="#378B5B"/><circle cx="40" cy="44" r="2" fill="#378B5B"/><circle cx="46.5" cy="44" r="2" fill="#378B5B"/><circle cx="53.5" cy="44" r="2" fill="#378B5B"/><circle cx="60" cy="44" r="2" fill="#378B5B"/><circle cx="67" cy="44" r="2" fill="#378B5B"/>
+  <circle cx="30" cy="50" r="1.8" fill="#2FA05F"/><circle cx="36.6" cy="50" r="1.8" fill="#2FA05F"/><circle cx="43" cy="50" r="1.8" fill="#2FA05F"/><circle cx="57" cy="50" r="1.8" fill="#2FA05F"/><circle cx="63.3" cy="50" r="1.8" fill="#2FA05F"/><circle cx="70" cy="50" r="1.8" fill="#2FA05F"/>
+  <circle cx="33" cy="56" r="1.6" fill="#28B262"/><circle cx="40" cy="56" r="1.6" fill="#28B262"/><circle cx="60" cy="56" r="1.6" fill="#28B262"/><circle cx="67" cy="56" r="1.6" fill="#28B262"/>
+  <circle cx="30" cy="62" r="1.4" fill="#22C55E"/><circle cx="36.6" cy="62" r="1.4" fill="#22C55E"/><circle cx="43.3" cy="62" r="1.4" fill="#22C55E"/><circle cx="50" cy="62" r="1.4" fill="#22C55E"/><circle cx="56.6" cy="62" r="1.4" fill="#22C55E"/><circle cx="63.3" cy="62" r="1.4" fill="#22C55E"/><circle cx="70" cy="62" r="1.4" fill="#22C55E"/>
+  <circle cx="40" cy="68" r="1.2" fill="#22C55E"/><circle cx="46.5" cy="68" r="1.2" fill="#22C55E"/><circle cx="53.5" cy="68" r="1.2" fill="#22C55E"/><circle cx="60" cy="68" r="1.2" fill="#22C55E"/>
+  <circle cx="50" cy="74" r="1" fill="#22C55E"/>
+</svg>

@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/disksieve-core",
+    "crates/disksieve-cli",
+    "src-tauri",
+]
+resolver = "2"
