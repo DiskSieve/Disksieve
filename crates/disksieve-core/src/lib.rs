@@ -6,10 +6,15 @@
 //! This crate has **no dependency on Tauri or any UI layer** — everything here is testable
 //! with `cargo test -p disksieve-core`.
 
+pub mod aggregator;
 pub mod error;
 pub mod scanner;
 pub mod tree;
 
+pub use aggregator::{
+    build_viewport, OtherBucket, SizeMetric, Viewport, ViewportItem, ViewportOptions,
+    DEFAULT_MAX_ITEMS,
+};
 pub use error::{CoreError, CoreResult};
 pub use scanner::{scan, CancelToken, ScanOptions, ScanProgress};
 pub use tree::{
